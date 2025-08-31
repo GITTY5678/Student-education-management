@@ -1,11 +1,16 @@
+# Student_management.py
 import pymysql
 from datetime import datetime, date
 from tabulate import tabulate
 from tkinter import *
 from tkcalendar import Calendar
+import Educationpackage
 
 # ===== Database Setup =====
 def get_db_connection():
+    """Establishes a database connection and returns the connection object
+    and the connection parameters."""
+    
     host = input("Enter DB host (default=localhost): ") or "localhost"
     user = input("Enter DB username (default=root): ") or "root"
     password = input("Enter DB password: ")
@@ -14,12 +19,16 @@ def get_db_connection():
     try:
         con = pymysql.connect(host=host, user=user, password=password, database=database)
         print("✅ Connected to database successfully")
-        return con
+        # Return both the connection object and the parameters
+        return con, (host, user, password, database)
+            
     except Exception as e:
         print("❌ Connection failed:", e)
         exit(1)
+    
 
-con = get_db_connection()
+# Store the connection and parameters globally
+con, db_params = get_db_connection()
 cur = con.cursor()
 
 def setup_tables():
@@ -63,7 +72,14 @@ def existing_user():
     if result:
         sno, name = result
         print('Welcome,', name)
-        checklist(sno)   # pass user ID
+        print('''1. Proceed to Checklist
+2. Study routine (newly introduced)''')
+        choice = input('Enter your choice: ')
+        if choice == '1':
+            checklist(sno)
+        if choice == '2':
+            # Pass the stored parameters to the function
+            Educationpackage.student(db_params[0], db_params[1], db_params[2], db_params[3])
     else:
         print('❌ User not found.')
 
